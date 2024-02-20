@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+
+<h1>회원가입</h1>
+
+<div align="center">
+
+<table border="1">
+	<tr>
+		<th>
+			아이디
+		</th>
+		<td>
+			<input type="text" id="userid" size="20" placeholder="아이디">
+			<input type="button" id="id_chk_btn" value="중복확인"></br>
+			<p id="idcheck" style="font-size: 8px"></p>
+		</td>
+	</tr>
+	<tr>
+		<th>
+			인증된 아이디
+		</th>
+		<td>
+			<input type="text" id="id" size="20" readonly="readonly">
+		</td>
+	</tr>
+	<tr>
+		<th>
+			비밀번호
+		</th>
+		<td>
+			<input type="password" id="pw" size="20">
+		</td>
+	</tr>
+	<tr>
+		<th>
+			이름
+		</th>
+		<td>
+			<input type="text" id="name" size="20">
+		</td>
+	</tr>
+	<tr>
+		<th>
+			이메일
+		</th>
+		<td>
+			<input type="text" id="email" size="20">
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<button type="button" id="regi">회원가입</button>
+		</td>
+	</tr>
+</table>
+
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+	
+	$("#id_chk_btn").click(function () {
+		
+		
+		$.ajax({
+			url:"http://localhost:9900/idcheck",
+			type:"post",
+			data:{ "id":$("#userid").val() },
+			success:function(msg){
+				// alert('success');
+				if(msg === "YES"){
+					$("#idcheck").text("사용가능한 아이디입니다");
+					$("#id").val($("#userid").val());
+					
+				}else{
+					$("#idcheck").text("사용중인 아이디입니다");
+					$("#id").val("");
+				}
+			},
+			error:function(){
+				alert('error');
+			}
+		});				
+	});		
+	
+	$("#regi").click(function(){
+		
+		// 유효성 검사 해야함!
+		
+		$.ajax({
+			url:"http://localhost:9900/addmember",
+			type:"get",
+			data:{id:$("#id").val(), pw:$("#pw").val(), name:$("#name").val(), email:$("#email").val()},
+			success:function(add){
+				//alert('success');
+				console.log(JSON.stringify(add));
+			},
+			error:function(){
+				alert('error');
+			}
+		});
+	});
+</script>
+
+
+</body>
+</html>
