@@ -1,246 +1,140 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <title>Insert title here</title>
+
+<style type="text/css">
+.center{
+	margin: auto;
+	width: 60%;
+	border: 3px solid #0000ff;
+	padding: 10px;
+}
+</style>
 </head>
 <body>
 
 <h1>회원가입</h1>
 
-<div align="center">
-
-<table border="1">
-	<tr>
-		<th>
-			아이디
-		</th>
-		<td>
-			<input type="text" id="userid" size="20" placeholder="아이디">
-			<input type="button" id="id_chk_btn" value="중복확인"></br>
-			<p id="idcheck" style="font-size: 8px"></p>
-		</td>
-	</tr>
-	<tr>
-		<th>
-			인증된 아이디
-		</th>
-		<td>
-			<input type="text" id="id" size="20" readonly="readonly">
-		</td>
-	</tr>
-	<tr>
-		<th>
-			비밀번호
-		</th>
-		<td>
-			<input type="password" id="pw" size="20">
-		</td>
-	</tr>
-	<tr>
-		<th>
-			이름
-		</th>
-		<td>
-			<input type="text" id="name" size="20">
-		</td>
-	</tr>
-	<tr>
-		<th>
-			이메일
-		</th>
-		<td>
-			<input type="text" id="email" size="20">
-		</td>
-	</tr>
-	<tr>
-		<td colspan="2">
-			<button type="button" id="regi">회원가입</button>
-		</td>
-	</tr>
+<div class="center">
+<table class="table">
+<tr>
+	<td>아이디</td>
+	<td>
+		<input type="text" id="userid" size="20">
+		<input type="button" id="id_chk_btn" value="id확인"><br/>
+		<p id="idcheck" style="font-size: 8px"></p> 
+	</td>
+</tr>
+<tr>
+	<td>인증된 아이디</td>	
+	<td>
+		<input type="text" id="id" size="20" readonly="readonly">		 
+	</td>	
+</tr>
+<tr>
+	<td>패스워드</td>
+	<td>
+		<input type="text" id="pw" size="20">
+	</td>
+</tr>
+<tr>
+	<td>이름</td>
+	<td>
+		<input type="text" id="name" size="20">
+	</td>
+</tr>
+<tr>
+	<td>이메일</td>
+	<td>
+		<input type="text" id="email" size="20">
+	</td>
+</tr>
+<tr>
+	<td colspan="2" align="center">
+		<input type="button" id="regi" value="회원가입">
+	</td>
+</tr>
 </table>
-
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script type="text/javascript">
 
-//아이디 중복확인을 하지않고 회원가입 버튼을 바로 클릭할때 넘어가지는 것을 막기위해 설정.
 let checking = false;
+
+$("#id_chk_btn").click(function () {
 	
-	$("#id_chk_btn").click(function () {
-		
-		checking = true;
-		
-		$.ajax({
-			url:"http://localhost:9900/idcheck",
-			type:"post",
-			data:{ "id":$("#userid").val() },
-			success:function(msg){
-				// alert('success');
-				if(msg === "YES"){
-					$("#idcheck").text("사용가능한 아이디입니다");
-					$("#id").val($("#userid").val());
-					
-				}else{
-					$("#idcheck").text("사용중인 아이디입니다");
-					$("#id").val("");
-					checking = false;
-				}
-			},
-			error:function(){
-				alert('error');
-			}
-		});				
-	});		
+	checking = true;
 	
-	$("#regi").click(function(){
+	// userid (빈칸)검사	
 		
-		if(checking === false){
-			alert('중복확인은 필수입니다.');
+	$.ajax({
+		url:"http://localhost:9900/idcheck",
+		type:"post",
+		data:{ id:$("#userid").val() },
+		success:function(msg){
+		//	alert('success');
+			alert(msg);
+			if(msg === 'YES'){
+				$("#idcheck").text("사용할 수 있는 아이디입니다");
+				$("#id").val( $("#userid").val() );
+			}else{
+				$("#idcheck").text("사용중인 아이디입니다");
+				$("#id").val("");
+				checking = false;
+			}		
+		},
+		error:function(){
+			alert('error');
 		}
-		// 유효성 검사 해야함!
-		
-		let member = {
-				id:$("#id").val(),
-				pw:$("#pw").val(),
-				name:$("#name").val(),
-				email:$("#email").val(),
+	})	
+});
+
+$("#regi").click(function () {
+	
+	if(checking === false){
+		alert('idcheck를 해 주십시오');
+		return;
+	}
+	
+	// 첵크
+	
+	let member = {
+		id:$("#id").val(),
+		pw:$("#pw").val(),
+		name:$("#name").val(),
+		email:$("#email").val()
+	};
+
+	$.ajax({
+		"url":"http://localhost:9900/addmember",
+		"type":"post",
+		"data": member,
+		success:function(msg){
+			alert('가입을 축하합니다');
+			
+			location.href = "login.html";
+		},
+		error:function(){
+			alert('error');
 		}
-		
-		$.ajax({
-			"url":"http://localhost:9900/addmember",
-			"type":"get",
-			"data": member,
-			success:function(msg){
-				alert('가입을 축하합니다.');
-				
-				location.href = "login.html";
-			},
-			error:function(){
-				alert('error');
-			}
-		});
 	});
+	
+	
+	
+});
 </script>
 
-
 </body>
-=======
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-</head>
-<body>
-
-<h1>회원가입</h1>
-
-<div align="center">
-
-<table border="1">
-	<tr>
-		<th>
-			아이디
-		</th>
-		<td>
-			<input type="text" id="userid" size="20" placeholder="아이디">
-			<input type="button" id="id_chk_btn" value="중복확인"></br>
-			<p id="idcheck" style="font-size: 8px"></p>
-		</td>
-	</tr>
-	<tr>
-		<th>
-			인증된 아이디
-		</th>
-		<td>
-			<input type="text" id="id" size="20" readonly="readonly">
-		</td>
-	</tr>
-	<tr>
-		<th>
-			비밀번호
-		</th>
-		<td>
-			<input type="password" id="pw" size="20">
-		</td>
-	</tr>
-	<tr>
-		<th>
-			이름
-		</th>
-		<td>
-			<input type="text" id="name" size="20">
-		</td>
-	</tr>
-	<tr>
-		<th>
-			이메일
-		</th>
-		<td>
-			<input type="text" id="email" size="20">
-		</td>
-	</tr>
-	<tr>
-		<td colspan="2">
-			<button type="button" id="regi">회원가입</button>
-		</td>
-	</tr>
-</table>
-
-</div>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-<script type="text/javascript">
-	
-	$("#id_chk_btn").click(function () {
-		
-		
-		$.ajax({
-			url:"http://localhost:9900/idcheck",
-			type:"post",
-			data:{ "id":$("#userid").val() },
-			success:function(msg){
-				// alert('success');
-				if(msg === "YES"){
-					$("#idcheck").text("사용가능한 아이디입니다");
-					$("#id").val($("#userid").val());
-					
-				}else{
-					$("#idcheck").text("사용중인 아이디입니다");
-					$("#id").val("");
-				}
-			},
-			error:function(){
-				alert('error');
-			}
-		});				
-	});		
-	
-	$("#regi").click(function(){
-		
-		// 유효성 검사 해야함!
-		
-		$.ajax({
-			url:"http://localhost:9900/addmember",
-			type:"get",
-			data:{id:$("#id").val(), pw:$("#pw").val(), name:$("#name").val(), email:$("#email").val()},
-			success:function(add){
-				//alert('success');
-				console.log(JSON.stringify(add));
-			},
-			error:function(){
-				alert('error');
-			}
-		});
-	});
-</script>
-
-
-</body>
->>>>>>> branch 'main' of https://github.com/shinminchan/springFrontSamples.git
 </html>
+
+
+
+
+
