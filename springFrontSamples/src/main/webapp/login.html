@@ -89,13 +89,26 @@ $("#login").click(function(){
 		url:"http://localhost:9900/login",
 		type:"post",
 		data:{id:$("#id").val(), pw:$("#pw").val()},
-		success:function(mem){
-			//alert('success');
-			console.log(JSON.stringify(mem));
-		},
-		error:function(){
-			alert('error');
-		}
+		success:function(member){
+	         if(member === ""){   // login되지 않았을 때
+	            alert('id나 password를 확인하세요');
+	            $("#id").val("");
+	            $("#pw").val("");
+	            $("#id").focus();   // id 입력창으로 포커스를 맞춘다 
+	         }else{
+	            // sessionStorage에 저장
+	            sessionStorage.setItem("login", JSON.stringify(member))
+	            
+	            alert(member.id + "님 환영합니다");
+	            
+	            location.href = "bbslist.html";
+	         }
+	         
+	      },
+	      error:function(){
+	         alert('error');
+	      }
+
 	});
 });
 

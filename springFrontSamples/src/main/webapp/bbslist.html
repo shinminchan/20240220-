@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>bbslist</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">  
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script type="text/javascript" src="./js/jquery.twbsPagination.min.js"></script>
+
+<style type="text/css">
+.center{
+	margin: auto;
+	width: 1000px;
+	text-align: center;
+}
+tr{	
+	line-height: 18px;
+}
+table a{
+	text-decoration: none;
+}
+table a:hover {
+	text-decoration: underline;
+}
+th.colorfy {
+    background: royalblue;
+    color: white;
+}
+</style>
+
+</head>
+<body>
+
+<h1>게시판</h1>
+
+<div class="center">
+
+<div class="d-flex justify-content-center align-items-center">
+	<select id="choice" class="form-select" style="width:auto;">
+		<option value="start">검색</option>
+		<option value="title">제목</option>
+		<option value="content">내용</option>
+		<option value="writer">작성자</option>
+	</select>&nbsp;
+	
+	<div class="col-sm-3 my-1" style="width:auto;">
+		<input type="text" class="form-control" id="search">
+	</div>&nbsp;
+	
+	<button type="button" class="btn btn-primary" onclick="searchBtn()">검색</button>
+</div>
+
+<br/>
+
+<table class="table table-hover">
+<colgroup>
+	<col width="70"/><col width="600"/><col width="100"/><col width="150"/>
+</colgroup>
+
+<thead>
+<tr>
+	<th>번호</th><th>제목</th><th>조회수</th><th>작성자</th>
+</tr>	
+</thead>
+
+<tbody id="bbslist">
+</tbody>
+
+</table>
+
+<br/>
+
+<div class="container">
+    <nav aria-label="Page navigation">
+        <ul class="pagination" id="pagination" style="justify-content:center"></ul>
+    </nav>
+</div>
+
+<br>
+
+<a href="bbswrite.html">글쓰기</a>
+
+</div>
+
+<script type="text/javascript">
+$(document).ready(function () {
+	/*
+	$.ajax({
+		url:"http://localhost:9900/bbslist",
+		type:"get",
+		data:{ choice:"", search:"", pageNumber:0 },
+		success:function(json){
+			// alert('success');
+			// alert(JSON.stringify(json));
+			
+			let bbslist = json.bbslist;
+			
+			let str = "";
+			for(let i = 0;i < bbslist.length; i++){
+				str += "<tr>";	
+				str += "	<td>" + (i + 1) + "</td>";
+				str += "	<td>" + bbslist[i].title + "</td>";
+				str += "	<td>" + bbslist[i].readcount + "</td>";
+				str += "	<td>" + bbslist[i].id + "</td>";
+				str += "</tr>";	
+			}			
+			$("#bbslist").html(str);
+		},
+		error:function(){
+			alert('error');
+		}		
+	});	
+	*/
+	
+	bbslist(0);
+});
+
+function bbslist( pn ) {
+	let choice = $("#choice").val();
+	let search = $("#search").val();
+	
+	$.ajax({
+		url:"http://localhost:9900/bbslist",
+		type:"get",
+		data:{ "choice":choice, "search":search, "pageNumber":pn },
+		success:function(json){
+			// alert('success');
+			// alert(JSON.stringify(json));
+			
+			let bbslist = json.bbslist;
+			let pageBbs = json.pageBbs;
+			
+			let str = "";
+			for(let i = 0;i < bbslist.length; i++){
+				str += "<tr>";	
+				str += "	<td>" + (i + 1) + "</td>";
+				
+				if(bbslist[i].del == 0){
+					str += "	<td style='text-align:left'>" 
+										+ getArrow( bbslist[i].depth ) 
+										+ "<a href='bbsdetail.html?seq=" + bbslist[i].seq + "'>" + titleDot(bbslist[i].title) + "</a>" 
+								+ "</td>";
+				}else{
+					str += "	<td><font color='#ff0000'>이 글은 작성자의 의해서 삭제되었습니다</font></td>";
+				}
+				
+				str += "	<td>" + bbslist[i].readcount + "</td>";
+				str += "	<td>" + bbslist[i].id + "</td>";
+				str += "</tr>";	
+			}			
+			$("#bbslist").html(str);
+			
+			// 페이징
+			loadPaging(pageBbs, pn);
+		},
+		error:function(){
+			alert('error');
+		}		
+	});	
+}
+
+function searchBtn() {
+	bbslist(0);
+}
+
+function loadPaging(pageBbs, pn) {
+	
+	// 초기화
+	$("#pagination").twbsPagination("destroy");
+	
+	$("#pagination").twbsPagination({
+		startPage:pn + 1,
+		totalPages:pageBbs,
+		visiblePages:10,
+		first:'<span srid-hidden="true">«</span>',		// 처음 페이지로 이동
+		prev:"이전",
+		next:"다음",
+		last:'<span srid-hidden="true">»</span>',
+		initiateStartPageClick:false,					// 자동 실행이 되지 않도록 설정
+		onPageClick:function(event, page){
+			bbslist(page-1);
+		}
+	});	
+}
+
+
+
+// 답글 화살표 표시 함수
+function getArrow( depth ) {
+	let rs = "<img src='./images/arrow1.png' width='16px' height='16px'/>&nbsp;";
+	let nbsp = "&nbsp;&nbsp;&nbsp;&nbsp;";
+	
+	let ts = "";
+	for(let i = 0;i < depth; i++){
+		ts += nbsp;
+	}
+	
+	return depth==0?"":ts + rs;
+}
+
+// 제목이 너무 긴 경우 ... 으로 표시
+function titleDot(title) {
+	let newtitle;
+	
+	if(title.length > 40){
+		newtitle = title.trim().substring(0, 40);
+		newtitle += "...";
+	}else{
+		newtitle = title.trim();
+	}
+	
+	return newtitle;
+}
+</script>
+
+</body>
+</html>
+
+
+
+
